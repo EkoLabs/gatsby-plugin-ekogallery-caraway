@@ -1,0 +1,43 @@
+{% comment %}
+    Props:
+        navOptions
+        id
+        index
+        assetType
+        assetName
+        deliverableId
+        media
+        isHidden
+        variantId
+        device
+{% endcomment %}
+
+{% assign width = navOptions.item.width | default: 112 %}
+{% assign height = navOptions.item.height | default: 112 %}
+{% assign widths = navOptions.widths | default: '56,64,112,128,168,192' %}
+{% assign sizes = navOptions.sizes | default: '(max-width: 699px) 56px, 112px' %}
+
+<li data-id="{{ id }}"
+    data-type="{{ assetType }}"
+    aria-label="Go to item {{ index }}"
+    aria-current={% if index > 1 %}"false"{% else %}"true"{% endif %}
+{% if assetName %}
+    data-name="{{ assetName }}"
+{% endif %}
+{% if deliverableId %}
+    data-deliverableid="{{ deliverableId }}"
+{% endif %}
+{% if variantId != false %}
+    data-variant="{{ variantId }}"
+{% endif %}
+{% if isHidden %}
+    class="eko-hidden-variant"
+{% endif %}
+{% if device %}
+    data-device="{{ device }}"
+{% endif %}
+>
+<button type="button">
+    {{- media | image_url: width: width, height: height | image_tag: preload: true, loading: 'eager', fetchpriority: 'high', sizes: sizes, widths: widths -}}
+</button>
+</li>

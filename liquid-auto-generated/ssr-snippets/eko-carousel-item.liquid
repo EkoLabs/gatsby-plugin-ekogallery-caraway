@@ -1,0 +1,50 @@
+{% comment %}
+    Props:
+        id
+        index
+        type
+        preload
+        fetchPriority
+        loadPriority
+        media
+        variantId
+        isHidden
+        inline
+        carouselOptions
+{% endcomment %}
+
+{% comment %} Assign Default Values {% endcomment %}
+{% assign width = carouselOptions.item.width | default: 600 %}
+{% assign widths = carouselOptions.widths | default: '200,300,400,500,600,700,800,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200' %}
+{% assign sizes = carouselOptions.sizes | default: '(max-width: 740px) calc(100vw - 40px), (max-width: 999px) calc(100vw - 64px), min(730px, 40vw)' %}
+
+<li data-id="{{ id }}"
+    data-type="{{ type }}"
+    aria-label="Go to item {{ index }}"
+    aria-hidden={% if index > 1 %}"true"{% else %}"false"{% endif %}
+{% if isHidden %}
+    class="eko-hidden-variant"
+{% endif %}
+{% if variantId != false %}
+    data-variant="{{ variantId }}"
+{% endif %}
+{% if type == 'external_video' %}
+    data-src="{{ media | external_video_url: autoplay: '1' }}"
+{% elsif type == 'video' %}
+    data-srcset="{% for source in media.sources %}{{ source.url }} {{ source.mime_type }}{% unless forloop.last %}, {% endunless %}{% endfor %}"
+    {% if inline %}
+        data-inline="{{ inline }}"
+    {% endif %}
+{% endif %}
+{% if inline %}
+    data-inline="{{ inline }}"
+{% endif %}
+{% if device %}
+    data-device="{{ device }}"
+{% endif %}
+>
+{% comment %}
+    Note: for some reason we only use the carouselOptions height option in non eko carousel items, so height is not passed here by choise!
+{% endcomment %}
+{{- media | image_url: width: width | image_tag: preload: preload, loading: loadPriority, fetchpriority: fetchPriority, sizes: sizes, widths: widths -}}
+</li>

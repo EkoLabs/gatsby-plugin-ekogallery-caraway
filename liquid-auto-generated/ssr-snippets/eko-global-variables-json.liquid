@@ -1,0 +1,8 @@
+<script type="application/json" id="eko-gallery-config">
+    {
+        "activeExperiment": {{ activeExperiment | json }},
+        "metadata": {{ metafield | json }},
+        "blockSettings": {{ blockSettings | default: nil | json }},
+        "variants": {{ product.variants | json }}
+    }
+</script>

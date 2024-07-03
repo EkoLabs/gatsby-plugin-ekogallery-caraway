@@ -1,0 +1,126 @@
+{% comment %}
+    Props:
+        id
+        index
+        type
+        name
+        deliverableId
+        preload
+        fetchPriority
+        loadPriority
+        desktopCoverImage
+        coverImage
+        variantId
+        coverType
+        ctaButtonText
+        env
+        ekoLoading
+        isHidden
+        carouselOptions
+        activeExperiment
+{% endcomment %}
+
+{% comment %} Assign Default Values {% endcomment %}
+{% capture deliveryPrefix %}https://{{ env | default: '' }}play.eko.com/{% endcapture %}
+{% assign width = carouselOptions.item.width | default: 600 %}
+{% assign height = carouselOptions.item.height | default: 600 %}
+{% assign widths = carouselOptions.widths | default: '200,300,400,500,600,700,800,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200' %}
+{% assign sizes = carouselOptions.sizes | default: '(max-width: 740px) calc(100vw - 40px), (max-width: 999px) calc(100vw - 64px), min(730px, 40vw)' %}
+{% assign coverType = coverType | default: '' %}
+{% assign ctaButtonText = ctaButtonText | default: 'See It In Action' %}
+
+{% assign ekoLoadingQP = '' %}
+{% if ekoLoading and ekoLoading != '' %}
+    {% capture ekoLoadingQP %}&eko_loading={{ ekoLoading }}{% endcapture %}
+{% endif %}
+
+{% assign ekoFallbackQP = '' %}
+{% if ekoFallback %}
+    {% capture ekoFallbackQP %}&_eko_fallback={{ ekoFallback }}{% endcapture %}
+{% endif %}
+
+{% assign nocoverQP = '&nocover=true' %}
+{% if coverType == 'none' %}
+    {% assign nocoverQP = '&nocover=false' %}
+{% endif %}
+
+{% assign renderIframe = true %}
+{% if activeExperiment != false and ekoLoading != 'deferred' %}
+    {% assign renderIframe = false %}
+{% endif %}
+{% assign additionalQueryParams = '' %}
+{% for param in qp %}
+    {% capture additionalQueryParams %}{{ additionalQueryParams }}&{{ param[0] }}={{ param[1] }}{% endcapture %}
+{% endfor %}
+<li data-id="{{ id }}"
+    data-type="{{ type }}"
+    data-qp="{{ additionalQueryParams | url_escape }}"
+    aria-label="Go to item {{ index }}"
+    aria-hidden={% if index > 1 %}"true"{% else %}"false"{% endif %}
+{% if isHidden %}
+    class="eko-hidden-variant"
+{% endif %}
+{% if name %}
+    data-name="{{ name }}"
+{% endif %}
+{% assign additionalHashParams = '' %}
+{% if variantId != false %}
+    data-variant="{{ variantId }}"
+    {% capture additionalHashParams %}{{ additionalHashParams }}#variantId={{ variantMap[variantId] | default: variantId }}{% endcapture %}
+{% endif %}
+{% if deliverableId %}
+    data-deliverableid="{{ deliverableId }}"
+{% endif %}
+{% if type == 'interactive' and coverType %}
+    data-cover="{{ coverType }}"
+{% endif %}
+{% if type == 'interactive' and coverType == 'ctabutton' %}
+    data-cta-button-text="{{ ctaButtonText }}"
+{% endif %}
+{% if device %}
+    data-device="{{ device }}"
+{% endif %}
+>
+{% if type == 'interactive' %}
+    {% capture interactiveUrl %}{{ deliveryPrefix }}embed?did={{ deliverableId }}{{ nocoverQP }}&eko_pixel=true{{ ekoFallbackQP }}{{ additionalQueryParams }}{{ additionalHashParams }}{% endcapture %}
+
+    {% if renderIframe %}
+        <iframe allow="autoplay; fullscreen"
+            {% if activeExperiment.type == "deliverable" %}
+                class="eko-hidden"
+            {% endif %}
+            data-variant="CONTROL"
+            src="{{ interactiveUrl | url_escape }}{{ ekoLoadingQP }}"
+            style="width: 100%; height: 100%; border: 0;"></iframe>
+        {% if activeExperiment.type == "deliverable" %}
+            {% for variant in activeExperiment.variants %}
+                {% capture interactiveVariantUrl %}{{ deliveryPrefix }}embed?did={{ variant.params.deliverableId }}{{ nocoverQP }}&eko_pixel=true{{ ekoFallbackQP }}{{ additionalQueryParams }}{{ additionalHashParams }}{% endcapture %}
+                <iframe allow="autoplay; fullscreen"
+                        class="eko-hidden"
+                        data-variant="{{ variant.name }}"
+                        src="{{ interactiveVariantUrl | url_escape }}{{ ekoLoadingQP }}"
+                        style="width: 100%; height: 100%; border: 0;"></iframe>
+            {% endfor %}
+        {% endif %}
+    {% else %}
+        <template id="eko-interactive-iframe-template">
+            <iframe allow="autoplay; fullscreen"
+                    src="{{ interactiveUrl | url_escape }}"
+                    style="width: 100%; height: 100%; border: 0;"></iframe>
+        </template>
+    {% endif %}
+{% endif %}
+{% if type == 'spin' and renderIframe %}
+    <iframe allow="fullscreen" src="{{ deliveryPrefix }}spin?did={{ deliverableId }}&eko_pixel=true"
+            style="width: 100%; height: 100%; border: 0;"></iframe>
+{% endif %}
+{% if coverType != 'none' %}
+    {% assign coverImageClass = '' %}
+    {% if desktopCoverImage %}
+        {% capture coverImageClass %}eko-mobile-cover-image{% endcapture %}
+        {{- desktopCoverImage | image_url: width: width, height: height | image_tag: preload: preload, loading: loadPriority, fetchpriority: fetchPriority, sizes: sizes, widths: widths, class: 'eko-desktop-cover-image' -}}
+    {% endif %}
+    {{- coverImage | image_url: width: width, height: height | image_tag: preload: preload, loading: loadPriority, fetchpriority: fetchPriority, sizes: sizes, widths: widths, class: coverImageClass -}}
+{% endif %}
+
+</li>

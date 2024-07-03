@@ -1,0 +1,141 @@
+{% assign metafield = product.metafields._eko_.eko_gallery.value | default: product.metafields.custom.eko_gallery.value %}
+{% capture galleryPrefix %}https://{{ metafield.options.galleryEnv | default: '' }}play.eko.com/components/eko-gallery/eko-{{ metafield.options.galleryName | default: 'main' }}{% endcapture %}
+{% capture assetPrefix %}eko-{{ metafield.options.galleryName | default: 'main' }}{% endcapture %}
+
+{% capture deliveryPrefix %}https://{{ metafield.options.galleryEnv | default: '' }}play.eko.com/{% endcapture %}
+
+{% liquid
+    assign ekoMedia = ''
+    for asset in metafield.assets
+        if asset.mediaPosition
+            assign ekoMedia = ekoMedia | append: ',' | append: asset.mediaPosition | append: ',' | append: asset.desktopMediaPosition | append: ','
+        endif
+    endfor
+%}
+
+{% assign includeProductMedia = metafield.options.includeProductMedia | default: true, allow_false: true %}
+{% assign carouselItemWidth = metafield.options.carousel.item.width | default: 600 %}
+{% assign carouselItemHeight = metafield.options.carousel.item.height | default: 600 %}
+{% assign carouselWidths = metafield.options.carousel.widths | default: '200,300,400,500,600,700,800,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200' %}
+{% assign carouselSizes = metafield.options.carousel.sizes | default: '(max-width: 740px) calc(100vw - 40px), (max-width: 999px) calc(100vw - 64px), min(730px, 40vw)' %}
+{% assign navEnabled = metafield.options.nav.enabled | default: true, allow_false: true %}
+
+
+
+{% liquid
+    assign activeExperiment = false
+    assign ekoLoading = ''
+    assign today_date = 'now' | date: '%s'
+    if metafield.experiments
+        for experiment in metafield.experiments
+            if experiment.type != "gallery" and experiment.type != "deliverable"
+                continue
+            endif
+            assign start_date = experiment.startDate | date: '%s'
+            assign end_date = experiment.endDate | date: '%s'
+            if experiment.active == true and today_date > start_date and today_date < end_date
+                assign activeExperiment = experiment
+            endif
+        endfor
+    endif
+
+    # For deliverable type experiments we must use deffered loading since we create multiple iframes
+    if activeExperiment.deferredLoading == true or activeExperiment.type == 'deliverable'
+        assign ekoLoading = 'deferred'
+    endif
+%}
+
+
+
+<section
+        class="eko-gallery eko-nav-bottom"
+        data-version="1.0"
+        data-storeproductid="{{ product.id }}"
+        data-ekoproductid="{{ metafield.product.id | default: '' }}"
+        {% if product.selected_or_first_available_variant %}data-activevariant="{{ product.selected_or_first_available_variant.id }}"{% endif %}
+        aria-controls="main-content"
+>
+    {% if navEnabled %}
+        <ul class="eko-nav">
+            {% assign current_index = 1 %}
+
+{% comment %} Iterate over eko assets {% endcomment %}
+{% for asset in metafield.assets %}
+    {% assign mediaPosition = asset.mediaPosition | default: 0 %}
+    {% assign media = product.media[mediaPosition] | default: product.media[0] %}
+    {%- assign variantId = false -%}
+    {%- for variant in product.variants -%}
+        {% if variant.id == product.selected_or_first_available_variant.id %}{%- assign media = variant.media[0] -%}{% endif %}
+        {% if variant.featured_media.id == media.id %}
+            {%- assign variantId = variant.id -%}
+        {% endif %}
+    {% endfor %}
+
+    {% render 'eko-nav-item', navOptions: metafield.options.nav, index: current_index, id: current_index, assetType: asset.type, assetName: asset.name, deliverableId: asset.deliverableId, media: media, variantId: product.selected_or_first_available_variant.id %}
+
+    {% assign current_index = current_index | plus: 1 %}
+{% endfor %}
+
+{% comment %} Iterate over product media {% endcomment %}
+
+{% if includeProductMedia %}
+    {%- for variant in product.variants -%}
+        {%- for media in variant.media -%}
+                {% assign isHidden = false %}
+                {% if variant.id != product.selected_or_first_available_variant.id %}
+                    {% assign isHidden = true %}
+                {% endif %}
+                {% render 'eko-nav-item', navOptions: navOptions, id: current_index, index: current_index, assetType: media.media_type, media: media, variantId: variant.id, isHidden: isHidden %}
+                {% assign current_index = current_index | plus: 1 %}
+        {%- endfor -%}
+    {%- endfor -%}
+{% endif %}
+        </ul>
+    {% endif %}
+    <ul class="eko-carousel">
+        {% assign carouselWidthsArray = carouselWidths | split: ',' %}
+{% assign current_index = 1 %}
+{% assign loadPriority = 'eager' %}
+{% assign fetchPriority = 'high' %}
+{% assign preload = true %}
+{% assign inline = true %}
+
+{% for asset in metafield.assets %}
+    {% assign mediaPosition = asset.mediaPosition | default: 0 %}
+    {% assign coverImageMedia = product.media[mediaPosition] | default: product.media[0] %}
+    {% assign coverType = asset.coverType | default: '' %}
+    {% assign ctaButtonText = asset.ctaButtonText | default: 'See It In Action' %}
+    {%- assign variantId = false -%}
+    {%- for variant in product.variants -%}
+        {% if variant.id == product.selected_or_first_available_variant.id %}{%- assign coverImageMedia = variant.media[0] -%}{% endif %}
+        {% if variant.featured_media.id == media.id %}{%- assign variantId = variant.id -%}{% endif %}
+    {% endfor %}
+
+    {% render 'eko-carousel-interactive-item', carouselOptions: metafield.options.carousel, id: current_index, index: current_index, type: asset.type, name: asset.name, deliverableId: asset.deliverableId, preload: preload, fetchPriority: fetchPriority, loadPriority: loadPriority, coverImage: coverImageMedia, variantId: product.selected_or_first_available_variant.id, coverType: coverType, ctaButtonText: ctaButtonText, activeExperiment: activeExperiment, ekoFallback: metafield.options.ekoFallback, env: metafield.options.galleryEnv, ekoLoading: ekoLoading, variantId: product.selected_or_first_available_variant.id, variantMap: metafield.variantMap, qp: asset.qp %}
+
+    {% assign current_index = current_index | plus: 1 %}
+    {% assign preload = false %}
+    {% assign fetchPriority = 'auto' %}
+{% endfor %}
+
+{% if includeProductMedia %}
+    {%- for variant in product.variants -%}
+        {%- for media in variant.media -%}
+                {% assign isHidden = false %}
+                {% if variant.id != product.selected_or_first_available_variant.id %}
+                    {% assign isHidden = true %}
+                {% endif %}
+                {% render 'eko-carousel-item', carouselOptions: metafield.options.carousel, id: current_index, index: current_index, type: media.media_type, preload: preload, fetchPriority: fetchPriority, loadPriority: loadPriority, media: media, variantId: variant.id, inline: inline, isHidden: variantId != false and variantId != product.selected_or_first_available_variant.id %}
+                {% assign current_index = current_index | plus: 1 %}
+                {% assign preload = false %}
+                {% assign fetchPriority = 'auto' %}
+        {%- endfor -%}
+    {%- endfor -%}
+{% endif %}
+
+    </ul>
+</section>
+
+
+{% render 'eko-global-variables-json', blockSettings: block.settings, activeExperiment: activeExperiment, metafield: metafield, product: product %}
+
