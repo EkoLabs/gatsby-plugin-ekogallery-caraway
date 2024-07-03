@@ -7,13 +7,13 @@ This is a gatsby plugin to integrate the [eko](https://eko.com) gallery into you
 ### Install the plugin as a dependency
 
 ```bash
-npm install gatsby-plugin-ekogallery --save
+npm install EkoLabs/gatsby-plugin-ekogallery-caraway --save
 ```
 
 OR
 
 ```bash
-yarn add gatsby-plugin-ekogallery
+yarn add EkoLabs/gatsby-plugin-ekogallery-caraway
 ```
 
 ## Configuration
