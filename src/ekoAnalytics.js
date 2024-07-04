@@ -35,8 +35,10 @@ export function reset(...args) {
 
 export function resume(currentUrl) {
     paused = false;
+    lastUrl = currentUrl;
+
     let trackingQueue = trackingQueues[currentUrl];
-    while (trackingQueue.length > 0) {
+    while (trackingQueue?.length > 0) {
         const trackingCall = trackingQueue.shift();
         track(...trackingCall);
     }
