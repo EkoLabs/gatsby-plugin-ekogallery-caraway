@@ -1,5 +1,5 @@
 const trackingQueues = {};
-let paused = false;
+let paused = true;
 let lastUrl;
 
 export function pause() {
