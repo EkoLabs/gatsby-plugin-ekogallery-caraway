@@ -4,7 +4,7 @@ import { usePluginOptionsQuery } from '../../utils.js';
 import contextPackers from './contextPackers/index.js';
 import { Script } from 'gatsby';
 
-const EKO_ANALYTICS_PLATFORM_URL = 'https://storage.eko.com/efu/ekoanalytics/ea-spa-infrastructure/latest/EkoAnalyticsPlatform.min.js';
+const EKO_ANALYTICS_PLATFORM_URL = 'https://storage.eko.com/efu/ekoanalytics/master/latest/EkoAnalyticsPlatform.min.js';
 
 function isProductionEnv(shopDomain) {
     // "window" will not be defined in the SSR phase.
