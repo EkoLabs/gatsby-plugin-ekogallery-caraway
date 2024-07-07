@@ -82,7 +82,7 @@
 {% endif %}
 >
 {% if type == 'interactive' %}
-    {% capture interactiveUrl %}{{ deliveryPrefix }}embed?did={{ deliverableId }}{{ nocoverQP }}&eko_pixel=true{{ ekoFallbackQP }}{{ additionalQueryParams }}{{ additionalHashParams }}{% endcapture %}
+    {% capture interactiveUrl %}{{ deliveryPrefix }}embed?did={{ deliverableId }}{{ nocoverQP }}&eko_pixel=true{{ ekoFallbackQP }}{{ additionalQueryParams }}{% endcapture %}
 
     {% if renderIframe %}
         <iframe allow="autoplay; fullscreen"
@@ -90,22 +90,22 @@
                 class="eko-hidden"
             {% endif %}
             data-variant="CONTROL"
-            src="{{ interactiveUrl | url_escape }}{{ ekoLoadingQP }}"
+            src="{{ interactiveUrl | url_escape }}{{ ekoLoadingQP }}{{ additionalHashParams }}"
             style="width: 100%; height: 100%; border: 0;"></iframe>
         {% if activeExperiment.type == "deliverable" %}
             {% for variant in activeExperiment.variants %}
-                {% capture interactiveVariantUrl %}{{ deliveryPrefix }}embed?did={{ variant.params.deliverableId }}{{ nocoverQP }}&eko_pixel=true{{ ekoFallbackQP }}{{ additionalQueryParams }}{{ additionalHashParams }}{% endcapture %}
+                {% capture interactiveVariantUrl %}{{ deliveryPrefix }}embed?did={{ variant.params.deliverableId }}{{ nocoverQP }}&eko_pixel=true{{ ekoFallbackQP }}{{ additionalQueryParams }}{% endcapture %}
                 <iframe allow="autoplay; fullscreen"
                         class="eko-hidden"
                         data-variant="{{ variant.name }}"
-                        src="{{ interactiveVariantUrl | url_escape }}{{ ekoLoadingQP }}"
+                        src="{{ interactiveVariantUrl | url_escape }}{{ ekoLoadingQP }}{{ additionalHashParams }}"
                         style="width: 100%; height: 100%; border: 0;"></iframe>
             {% endfor %}
         {% endif %}
     {% else %}
         <template id="eko-interactive-iframe-template">
             <iframe allow="autoplay; fullscreen"
-                    src="{{ interactiveUrl | url_escape }}"
+                    src="{{ interactiveUrl | url_escape }}{{ additionalHashParams }}"
                     style="width: 100%; height: 100%; border: 0;"></iframe>
         </template>
     {% endif %}
