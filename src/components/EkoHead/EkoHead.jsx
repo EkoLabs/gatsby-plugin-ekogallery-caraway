@@ -3,17 +3,7 @@ import PropTypes from 'prop-types';
 import EkoWebPixelHead from '../EkoWebPixelHead/EkoWebPixelHead.jsx';
 import EkoGalleryHead from '../EkoGalleryHead/EkoGalleryHead.jsx';
 import ekoAnalytics from '../../ekoAnalytics';
-import { shouldRenderEkoGallery, usePluginOptionsQuery } from '../../utils.js';
-import contextPackers from '../EkoWebPixelHead/contextPackers';
-
-function isProductionEnv(shopDomain) {
-    // "window" will not be defined in the SSR phase.
-    if (typeof window === 'undefined') {
-        return false;
-    }
-
-    return process.env.NODE_ENV === 'production' && window.location.hostname === shopDomain;
-}
+import { shouldRenderEkoGallery } from '../../utils.js';
 
 function getSplitTestingScript(product, config) {
     /* eslint-disable max-len */
@@ -58,58 +48,14 @@ function getSplitTestingScript(product, config) {
     /* eslint-enable max-len */
 }
 
-function getEkoAnalyticsSnippet(galleryEnv) {
-    /* eslint-disable max-len */
-    return `if (!window.EkoAnalytics) {
-        !function () {
-            var t, a, e, s, n;
-            'undefined' == typeof window || window.EkoAnalytics || (t = window, a = 'EkoAnalytics', e = document, s = 'script', t[a] || (t[a] = function () {
-                t[a].f ? (t[a].q.push(arguments), t[a].ts.push(Date.now())) : t[a].apply(t, arguments);
-            }, t[a].f = !0, t[a].q = t[a].q || [], t[a].ts = t[a].ts || [], t[a].t = Number(new Date), t[a].sa = [], t[a].cb = [], t[a].init = function (ids) {
-                t[a].id = ids;
-            }, t[a].childRequestIdsCallback = function (e) {
-                e.data && 'ea-ids-request' === e.data.type && t[a].sa.push(e.source);
-            }, t.addEventListener('message', t[a].childRequestIdsCallback)));
-        }();
-        
-        window.EkoAnalytics.cb.push(() => {
-            let setCookie = (key, value, additionalProperties = '') => {
-                window.document.cookie = \`\${key}=\${value}; domain=.\${window.location.hostname}; path=/; secure; samesite=strict; \${additionalProperties}\`;
-            };
-
-            setCookie('easid', encodeURIComponent(window.EkoAnalytics('getSid')));
-            setCookie('eauid', encodeURIComponent(window.EkoAnalytics('getUid')), 'max-age=2147483647');
-        });
-
-        window.EkoAnalytics('configure', {
-            snowplow: {
-                options: {
-                    appId: 'ekoStore',
-                },
-            },
-            ekoEnv: '${galleryEnv}',
-            env: 'website',
-        });
-        window.EkoAnalytics('track', 'PageView');
-    }`;
-    /* eslint-enable max-len */
-}
-
-
 const EkoHead = (props) => {
-    const [isEkoGallery, setIsEkoGallery] = useState(undefined);
+    const [isEkoGallery, setIsEkoGallery] = useState(false);
 
     let config = props.ekoProductConfig;
-    let pluginOptions = usePluginOptionsQuery();
-    let isProduction = isProductionEnv(pluginOptions.shopDomain);
-    let galleryEnv = isProduction ? 'production' : 'development';
-
 
     useEffect(() => {
         // Set the eko gallery flag based on the result of the split testing snippet.
-        let _isEkoGallery = shouldRenderEkoGallery(props.ekoProductConfig);
-        setIsEkoGallery(_isEkoGallery);
-        contextPackers.register(_isEkoGallery);
+        setIsEkoGallery(shouldRenderEkoGallery(props.ekoProductConfig));
     }, [props.product.id, props.ekoProductConfig]);
 
     useEffect(() => {
@@ -121,8 +67,8 @@ const EkoHead = (props) => {
     return (
         <>
             {config && <script>{getSplitTestingScript(props.product, config)}</script>}
-            <script>{getEkoAnalyticsSnippet(galleryEnv)}</script>
-            {typeof isEkoGallery === 'boolean' && <EkoWebPixelHead/>}
+
+            <EkoWebPixelHead ekoGallery={isEkoGallery} product={props.product} />
             {config && isEkoGallery && <EkoGalleryHead preloadImages={props.preloadImages} config={config} />}
         </>
     );
