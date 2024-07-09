@@ -26,7 +26,7 @@ function registerGalleryRelatedContextPackers() {
                 let experimentData = {
                     experimentid: currentProductExperiment.id || '',
                     experimenttype: currentProductExperiment.type || '',
-                    experimentvariant: currentProductExperiment.variant,
+                    experimentvariant: currentProductExperiment.variant || '',
                 };
 
                 let targetDevice = currentProductExperiment.targetDevice?.toLowerCase();
