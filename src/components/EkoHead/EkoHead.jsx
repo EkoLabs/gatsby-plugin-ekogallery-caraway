@@ -50,6 +50,9 @@ function getSplitTestingScript(product, config) {
 
 const EkoHead = (props) => {
     let config = props.ekoProductConfig;
+    let secondaryConfig = props.ekoSecondaryProductConfig;
+    let tertiaryConfig = props.ekoTertiaryProductConfig;
+
     let isEkoGallery = shouldRenderEkoGallery(config);
 
     useEffect(() => {
@@ -60,7 +63,13 @@ const EkoHead = (props) => {
 
     return (
         <>
+            {/*
+                Run the split testing on all eko product config related products.
+                This will make sure to set the local storage for each product experiment.
+             */}
             {config && <script>{getSplitTestingScript(props.product, config)}</script>}
+            {secondaryConfig && <script>{getSplitTestingScript(props.secondaryProduct, secondaryConfig)}</script>}
+            {tertiaryConfig && <script>{getSplitTestingScript(props.tertiaryProduct, tertiaryConfig)}</script>}
 
             <EkoWebPixelHead ekoGallery={isEkoGallery} product={props.product} />
             {config && isEkoGallery && <EkoGalleryHead preloadImages={props.preloadImages} config={config} />}
@@ -70,7 +79,11 @@ const EkoHead = (props) => {
 
 EkoHead.propTypes = {
     product: PropTypes.object.isRequired,
+    secondaryProduct: PropTypes.object,
+    tertiaryProduct: PropTypes.object,
     ekoProductConfig: PropTypes.object,
+    ekoSecondaryProductConfig: PropTypes.object,
+    ekoTertiaryProductConfig: PropTypes.object,
     preloadImages: PropTypes.array,
 };
 
