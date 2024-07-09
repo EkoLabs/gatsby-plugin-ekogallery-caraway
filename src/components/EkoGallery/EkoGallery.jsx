@@ -58,10 +58,6 @@ const EkoGallery = (props) => {
     function renderGallery() {
         let newProductWithMetafield = getProductWithMetafield(props.product, props.config, props.variantId);
         let newGalleryHtml = getRenderedLiquid(newProductWithMetafield);
-
-        // NOTE: local Cookware Set project
-        // newGalleryHtml = newGalleryHtml.replace('https://play.eko.com/embed?did=65df722af49fc95fd79f7e51', 'https://play.eko.com/embed?did=65df722af49fc95fd79f7e51&deliveryapp=http%3A%2F%2F127.0.0.1%3A8081');
-
         setGalleryHtml(newGalleryHtml);
         props.onEkoGalleryRendered();
     }
@@ -75,6 +71,7 @@ const EkoGallery = (props) => {
 
     useEffect(() => {
         if (scriptLoaded && galleryHtml) {
+            ekoAnalytics.reset('gallery');
             window.eko?.gallery?.init();
             ekoAnalytics.resume(window.location.pathname);
             window.eko?.gallery?.setVariant(props.variantId);

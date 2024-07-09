@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import EkoWebPixelHead from '../EkoWebPixelHead/EkoWebPixelHead.jsx';
 import EkoGalleryHead from '../EkoGalleryHead/EkoGalleryHead.jsx';
@@ -49,14 +49,8 @@ function getSplitTestingScript(product, config) {
 }
 
 const EkoHead = (props) => {
-    const [isEkoGallery, setIsEkoGallery] = useState(false);
-
     let config = props.ekoProductConfig;
-
-    useEffect(() => {
-        // Set the eko gallery flag based on the result of the split testing snippet.
-        setIsEkoGallery(shouldRenderEkoGallery(props.ekoProductConfig));
-    }, [props.product.id, props.ekoProductConfig]);
+    let isEkoGallery = shouldRenderEkoGallery(config);
 
     useEffect(() => {
         return () => {
