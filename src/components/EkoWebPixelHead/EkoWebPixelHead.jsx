@@ -31,7 +31,15 @@ function getEkoAnalyticsSnippet(galleryEnv) {
         
         window.EkoAnalytics.cb.push(() => {
             let setCookie = (key, value, additionalProperties = '') => {
-                window.document.cookie = \`\${key}=\${value}; domain=.\${window.location.hostname}; path=/; secure; samesite=strict; \${additionalProperties}\`;
+                let hostname = window.location.hostname;
+                let domain = hostname;
+            
+                let parts = hostname.split('.');
+                if (parts.length > 2) {
+                    domain = parts.slice(-2).join('.');
+                }
+            
+                window.document.cookie = \`\${key}=\${value}; domain=.\${domain}; path=/; secure; samesite=strict; \${additionalProperties}\`;
             };
 
             setCookie('easid', encodeURIComponent(window.EkoAnalytics('getSid')));
@@ -69,7 +77,7 @@ const EkoWebPixelHead = (props) => {
             <Script
                 src={EKO_ANALYTICS_PLATFORM_URL}
                 async
-                data-pxid={pixelId}
+                pxid={pixelId}
             />
             <script>{getEkoAnalyticsSnippet(galleryEnv)}</script>
         </>
