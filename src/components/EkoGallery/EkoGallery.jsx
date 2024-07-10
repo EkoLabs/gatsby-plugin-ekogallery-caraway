@@ -63,6 +63,15 @@ const EkoGallery = (props) => {
     }
 
     useEffect(() => {
+        window.eko = window.eko || {};
+        window.eko.ekoGalleryRendered = true;
+
+        return () => {
+            window.eko.ekoGalleryRendered = false;
+        };
+    }, []);
+
+    useEffect(() => {
         if (galleryHtml) {
             // Setup cover display tracking once the gallery html is rendered.
             trackCoverDisplayed();
