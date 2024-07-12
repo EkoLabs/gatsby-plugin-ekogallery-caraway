@@ -8,8 +8,9 @@ const EKO_ANALYTICS_PLATFORM_URL = 'https://storage.eko.com/efu/ekoanalytics/mas
 
 function isProductionEnv(shopDomain) {
     // "window" will not be defined in the SSR phase.
+    // NOTE: In this case its better to assume we are in production mode and filter out events according production url.
     if (typeof window === 'undefined') {
-        return false;
+        return true;
     }
 
     return process.env.NODE_ENV === 'production' && window.location.hostname === shopDomain;
