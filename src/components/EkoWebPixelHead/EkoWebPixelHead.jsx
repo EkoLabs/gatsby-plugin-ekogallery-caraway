@@ -7,10 +7,9 @@ import { Script } from 'gatsby';
 const EKO_ANALYTICS_PLATFORM_URL = 'https://storage.eko.com/efu/ekoanalytics/master/latest/EkoAnalyticsPlatform.min.js';
 
 function isProductionEnv(shopDomain) {
-    // "window" will not be defined in the SSR phase.
-    // NOTE: In this case its better to assume we are in production mode and filter out events according production url.
+    // "window" will not be defined in the SSR phase, check only NODE_ENV and filter events according production/not production url.
     if (typeof window === 'undefined') {
-        return true;
+        return process.env.NODE_ENV === 'production';
     }
 
     return process.env.NODE_ENV === 'production' && window.location.hostname === shopDomain;

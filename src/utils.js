@@ -44,12 +44,14 @@ function shouldRenderEkoGallery(ekoProductConfig) {
         return false;
     }
 
-    // If the split testing variant is set to not render the gallery, don't render it.
-    if (typeof window !== 'undefined') {
-        return window.eko?.splitTesting?.variant?.params?.renderEko !== false;
+    // "window" will not be defined in the SSR phase, better to assume that the gallery will not rendered and render it
+    // later on the client side code.
+    if (typeof window === 'undefined') {
+        return false;
     }
 
-    return true;
+    // If the split testing variant is set to not render the gallery, don't render it.
+    return window.eko?.splitTesting?.variant?.params?.renderEko !== false;
 }
 
 export {
