@@ -126,16 +126,14 @@ function registerGalleryRelatedContextPackers() {
 function register(ekoGallery) {
     ekoAnalytics.reset(GATSBY_PLUGIN_CONTEXT_PACKERS_TAG);
 
-    // When the eko gallery is present, we need to register the "add to cart" context packer, the "product viewed"
-    // context packer will be added by the gallery code.
+    // When the eko gallery is present, the "product viewed" context packer will be added by the gallery code.
     // When the eko gallery is not present, we need to register the context packers that the gallery code would have
-    // registered, the "product viewed" and "add to cart" context packers will be added by the EA pixel code.
-    if (ekoGallery) {
-        addToCartContextPacker();
-    } else {
+    // registered.
+    if (!ekoGallery) {
         registerGalleryRelatedContextPackers();
     }
 
+    addToCartContextPacker();
     pageViewedContextPacker();
 
     // If we're in a page with no gallery. Gallery contexts aren't registered so we resume tracking here
